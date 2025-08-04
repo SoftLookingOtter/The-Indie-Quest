@@ -6,6 +6,13 @@ namespace Tank_project
     {
         static void Main(string[] args)
         {
+
+#if DEBUG
+            Console.WriteLine("Debug Mode");
+#else
+            Console.WriteLine("Release Mode");
+#endif
+
             Random random = new Random();
 
             Console.WriteLine("What is your name, soldier?");
