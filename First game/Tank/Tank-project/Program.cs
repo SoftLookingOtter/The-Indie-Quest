@@ -8,9 +8,9 @@ namespace Tank_project
         {
 
 #if DEBUG
-            Console.WriteLine("Debug Mode");
+            Console.WriteLine("Debug Mode"); 
 #else
-            Console.WriteLine("Release Mode");
+            Console.WriteLine("Release Mode");  
 #endif
 
             Random random = new Random();
