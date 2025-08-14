@@ -1,5 +1,6 @@
 ﻿using System;
-using System.IO; // För filhantering (Exists, ReadAllText, ReadAllLines, WriteAllText)
+using System.IO;   // Exists, ReadAllText, ReadAllLines, WriteAllText
+using System.Linq; // LINQ: Select, Where, Any
 
 namespace Backers
 {
@@ -44,34 +45,30 @@ namespace Backers
                 return;
             }
 
-            // Ladda alla backers (en per rad)
-            string[] backers = File.ReadAllLines(backersPath);
+            // LINQ: läs alla rader, trimma, filtrera bort tomma, och kolla om någon matchar spelarens namn (case-insensitive)
+            bool isBacker = File.ReadAllLines(backersPath)
+                                .Select(line => (line ?? "").Trim()) // Select (...) - En LINQ-metod som returnerar en trimmad sträng eller " " vid null
+                                .Where(s => s.Length > 0) // Where(...) – En LINQ-metod som filtrerar en följd. Den behåller bara de element där villkoret är sant. //Antal tecken i strängen s > 0
+                                .Any(s => string.Equals(s, playerName, StringComparison.OrdinalIgnoreCase)); // Any(...) - LINQ-metod som jämför om någon sträng i listan matchar spelarens namn, oavsett versaler eller gemener. 
 
-            // Jämför spelarens namn mot varje rad (case-insensitive, ignorerar tomma rader och extra mellanslag)
-            bool isBacker = false;
-            foreach (var line in backers)
-            {
-                string candidate = (line ?? "").Trim();
+            //Samma sak
 
-                if (candidate.Length == 0) continue;
-
-                if (string.Equals(candidate, playerName, StringComparison.OrdinalIgnoreCase))
-                {
-                    isBacker = true;
-                    break;
-                }
-            }
+            /* bool isBacker = File.ReadAllLines(backersPath)
+            .Select(line => (line ?? "").Trim())
+            .Where(backer => backer.Length > 0)
+            .Any(backer => string.Equals(backer, playerName, StringComparison.OrdinalIgnoreCase));
+            */
 
             // Skriv ut resultatet
             if (isBacker)
-            {
-                Console.WriteLine("You successfully enter Dr. Fred's secret laboratory and are greeted with a warm welcome for backing the game's Kickstarter!");
-            }
-            else
-            {
-                Console.WriteLine("Unfortunately I cannot let you into Dr. Fred's secret laboratory.");
-            }
-        }
+    {
+        Console.WriteLine("You successfully enter Dr. Fred's secret laboratory and are greeted with a warm welcome for backing the game's Kickstarter!");
     }
+    else
+    {
+        Console.WriteLine("Unfortunately I cannot let you into Dr. Fred's secret laboratory.");
+    }
+}
+}
 }
 
