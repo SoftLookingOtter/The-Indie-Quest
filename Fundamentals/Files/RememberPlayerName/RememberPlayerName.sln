@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RememberPlayerName", "RememberPlayerName\RememberPlayerName.csproj", "{DE04FF24-827A-4C9B-91B4-808225673BD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE04FF24-827A-4C9B-91B4-808225673BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE04FF24-827A-4C9B-91B4-808225673BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE04FF24-827A-4C9B-91B4-808225673BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE04FF24-827A-4C9B-91B4-808225673BD6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F4CB902E-7D20-4394-875F-F66FCC9ACD31}
+	EndGlobalSection
+EndGlobal
