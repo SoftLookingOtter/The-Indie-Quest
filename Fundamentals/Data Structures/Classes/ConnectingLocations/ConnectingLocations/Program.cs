@@ -1,82 +1,84 @@
 ﻿using System;
-using System.Collections.Generic;
-// using System.Reflection.Metadata; // onödig här, kan tas bort
+using System.Collections.Generic; // Behövs för listor
 
-class Location
+namespace ConnectingLocations
 {
-    public string Name;
-    public string Description;
-
-    // Nytt fält för Part 2: grannar / närliggande destinationer
-    public List<Location> Neighbors = new List<Location>();
-}
-
-class Program
-{
-    static void Main()
+    class Location
     {
-        // Skapa plats-objekt
-        var winterfell = new Location { Name = "Winterfell", Description = "the capital of the Kingdom of the North" };
-        var pyke = new Location { Name = "Pyke", Description = "the stronghold and seat of House Greyjoy" };
-        var riverrun = new Location { Name = "Riverrun", Description = "a large castle located in the central-western part of the Riverlands" };
-        var theTrident = new Location { Name = "The Trident", Description = "one of the largest and most well-known rivers on the continent of Westeros" };
-        var kingsLanding = new Location { Name = "King's Landing", Description = "the capital, and largest city, of the Seven Kingdoms" };
-        var highgarden = new Location { Name = "Highgarden", Description = "the seat of House Tyrell and the regional capital of the Reach" };
+        public string Name;
+        public string Description;
+        public List<Location> Neighbors = new List<Location>(); // List<T> är en generisk lista; här är T = Location, alltså en lista som innehåller Location-objekt. // Neighbors – fältets namn. Varje Location-instans får sin egen lista med grannar.
 
-        // Koppla platser enligt kartan (dubbelriktat)
-        ConnectLocations(pyke, winterfell);
-        ConnectLocations(winterfell, theTrident);
-        ConnectLocations(pyke, riverrun);
-        ConnectLocations(riverrun, theTrident);
-        ConnectLocations(riverrun, kingsLanding);
-        ConnectLocations(riverrun, highgarden);
-        ConnectLocations(kingsLanding, highgarden);
-        ConnectLocations(theTrident, kingsLanding);
+        //VÄNSTER SIDA (DEKLARATION)
 
-        // Välj aktuell plats (ändra denna rad för att testa olika platser)
-        Location currentLocation; // Deklaration utan initiering // Klass + variabelnamn, nytt "värde" sätts nedanför
+        //public – åtkomst(synlig utanför klassen).
 
-        // currentLocation = winterfell;
-        // Welcome(currentLocation);
-        // Console.WriteLine("—");
+        //List<Location> – typen: en generisk lista som kan innehålla Location-objekt.
 
-        // currentLocation = kingsLanding;
-        // Welcome(currentLocation);
-        // Console.WriteLine("—");
+        //Neighbors – fältets namn.
 
-        currentLocation = riverrun; // Initiering av currentLocation med riverrun-objektet
+        //→ Du talar om att det finns ett fält som ska hålla en referens till en lista.
 
-        Welcome(currentLocation);        // Här anropar/”kallar” vi metoden (skickar in ett argument)
-        ShowDestinations(currentLocation); // Lista möjliga destinationer från nuvarande plats
+        //HÖGER SIDA (INITIERING)
 
-        // currentLocation är ARGUMENT av typen Location som skickas in i Welcome/ShowDestinations.
-        // Inne i respektive metod tas argumentet emot som PARAMETERN 'loc' / 'from'.
+        //new List<Location>() – skapar en ny TOM lista i minnet(anropar listans parameterlösa konstruktor).
+        //→ Utvärderas till en referens till den nya listan.
+
+        // new List<Location>() → ny tom lista (ingen kopia).
+        // new List<Location>(någonLista) → kopia av elementen (ytlig kopia).
     }
 
-    static void Welcome(Location loc) // Här skapar/definierar vi metoden
-    // static = tillhör klassen, inte ett objekt.
-    // void = metoden returnerar inget värde.
-    // Welcome = metodens namn.
-    // Location = typ av parameter, som är ett objekt av klassen Location.
-    // loc = namnet på parametern, som används inom metoden.
+    class Program
     {
-        Console.WriteLine($"Welcome to {loc.Name}, {loc.Description}.");
-        Console.WriteLine();
-    }
+        static void Main()
+        {
+            var winterfell = new Location { Name = "Winterfell", Description = "the capital of the Kingdom of the North" };
 
-    // Ny metod: kopplar a och b som grannar åt båda håll (a↔b)
-    static void ConnectLocations(Location a, Location b)
-    {
-        if (!a.Neighbors.Contains(b)) a.Neighbors.Add(b);
-        if (!b.Neighbors.Contains(a)) b.Neighbors.Add(a);
-    }
+            var pyke = new Location { Name = "Pyke", Description = "the stronghold and seat of House Greyjoy" };
 
-    // Ny metod: skriver möjliga destinationer från en plats
-    static void ShowDestinations(Location from)
-    {
-        Console.WriteLine("Possible destinations are:");
-        int i = 1;
-        foreach (var n in from.Neighbors)
-            Console.WriteLine($"{i++}. {n.Name}");
+            var riverrun = new Location { Name = "Riverrun", Description = "a large castle located in the central-western part of the Riverlands" };
+
+            var theTrident = new Location { Name = "The Trident", Description = "one of the largest and most well-known rivers on the continent of Westeros" };
+
+            var kingsLanding = new Location { Name = "King's Landing", Description = "the capital, and largest city, of the Seven Kingdoms" };
+
+            var highgarden = new Location { Name = "Highgarden", Description = "the seat of House Tyrell and the regional capital of the Reach" };
+
+            ConnectLocations(pyke, winterfell);
+            ConnectLocations(winterfell, theTrident);
+            ConnectLocations(pyke, riverrun);
+            ConnectLocations(riverrun, theTrident);
+            ConnectLocations(riverrun, kingsLanding);
+            ConnectLocations(riverrun, highgarden);
+            ConnectLocations(kingsLanding, highgarden);
+            ConnectLocations(theTrident, kingsLanding);
+
+            var currentLocation = riverrun;
+
+            Welcome(currentLocation);
+            ShowDestinations(currentLocation);
+        }
+
+        static void Welcome(Location loc)
+        {
+            Console.WriteLine($"Welcome to {loc.Name}, {loc.Description}.");
+            Console.WriteLine();
+        }
+
+        static void ConnectLocations(Location a, Location b)
+        {
+            if (!a.Neighbors.Contains(b))
+                a.Neighbors.Add(b);
+            if (!b.Neighbors.Contains(a))
+                b.Neighbors.Add(a);
+        }
+
+        static void ShowDestinations(Location from)
+        {
+            Console.WriteLine("Possible destinations are:");
+            int i = 1;
+            foreach (var n in from.Neighbors)
+                Console.WriteLine($"{i++}. {n.Name}");
+        }
     }
 }
