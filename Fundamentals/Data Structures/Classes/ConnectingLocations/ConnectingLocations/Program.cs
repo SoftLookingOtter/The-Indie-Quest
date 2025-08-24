@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic; // Behövs för List<T> / Dictionary<,>
-using System.Linq; // Behövs för OrderBy, First, Find, etc.
 
 namespace ConnectingLocations
 {
@@ -60,6 +59,7 @@ namespace ConnectingLocations
 
             ConnectLocations(pyke, winterfell, 18); // a=pyke, b=winterfell, distance=18
             ConnectLocations(winterfell, theTrident, 10); // Hade kunnat skrivits med samma betydelse som -> 
+                                                          // ConnectLocations(a: winterfell, b: theTrident, distance: 10);
                                                           // ConnectLocations(a: winterfell, b: theTrident, distance: 10);
 
             ConnectLocations(pyke, riverrun, 3);
@@ -133,7 +133,7 @@ namespace ConnectingLocations
             foreach (var p in from.ShortestPaths) // Iterera över alla kortaste vägar från nuvarande plats
             {
                 if (p.StopNames.Count == 0) // Om inga mellanstopp finns
-                    Console.WriteLine($"{i++}.  {p.Destination.Name} ({p.Distance})"); // Skriv ut destinationens nummer, namn och avstånd
+                    Console.WriteLine($"{i++}. {p.Destination.Name} ({p.Distance})"); // Skriv ut destinationens nummer, namn och avstånd
                 else
                     Console.WriteLine($"{i++}. {p.Destination.Name} ({p.Distance} via {string.Join(", ", p.StopNames)})"); // Skriv ut destinationens nummer, namn, avstånd och mellanstopp
             }
@@ -192,69 +192,105 @@ namespace ConnectingLocations
         //Dijkstra fyller då source.ShortestPaths för den platsen.
 
         {
-            var dist = new Dictionary<Location, int>();        // min-känd distans från source till varje nod // Dictionary<,> är en generisk samling som lagrar nyckel-värde-par. 
-            var prev = new Dictionary<Location, Location>();   // Sparar vilken nod vi kom ifrån längs den kortaste vägen till varje nod, baklänges spårning för att kunna bygga upp vägen senare.
-            var Q = new List<Location>(graph);                 // noder kvar att besöka
+            var dist = new Dictionary<Location, int>();        // kortaste kända avstånd från 'source' till varje nod // Dictionary<,> är en generisk samling som lagrar nyckel-värde-par.                
+            var prev = new Dictionary<Location, Location>();   // föregångare på bästa vägen (för backtracking)
 
-            // Init
+            var Q = new List<Location>(graph);                 // kandidater att finalisera (börjar med ALLA noder, inkl. 'source')
+
+            // Loopa igenom alla noder
             foreach (var v in graph)
             {
-                dist[v] = int.MaxValue; // "oändligt"
-                prev[v] = null;
+                dist[v] = int.MaxValue; // och sätt distansen som "oändlig"
+                prev[v] = null; // föregångare ännu okänd
             }
-            dist[source] = 0;
+            dist[source] = 0; // distansen till källan är 0
 
-            // Huvudloop
-            while (Q.Count > 0)
+            // HUVUDLOOP // algoritmens kärna // VÄLJ ALLTID NODEN MED LÄGSTA DIST (SOURCE FÖRST), FINALISERA DEN, RELAXERA DESS GRANNAR, UPPREPA.
+
+            /*
+
+            1. VÄLJ U = NODEN MED LÄGSTA DIST I Q
+
+            2. OM U ÄR NULL ELLER MINSTA DIST = ∞ → BRYT (RESTEN OÅTKOMLIGT)
+
+            3. TA BORT U UR Q (FINALISERA U)
+
+            4. RELAXERA U:S DIREKTA KANTER: för varje kant U→V
+
+                - ALT = DIST[U] + EDGE.DISTANCE
+
+                - OM ALT < DIST[V] → UPPDATERA DIST[V] OCH PREV[V] = U
+
+            5. UPPREPA TILLS Q ÄR TOMT ELLER VI BRYTER
+
+            */
+
+            while (Q.Count > 0) // Första varvet väljer den startnoden (source) // så länge det finns kandidater kvar
             {
-                // plocka nod med minsta dist
-                var u = Q.OrderBy(v => dist[v]).First();
-                Q.Remove(u);
+                Location u = null; // kandidatnod vi ska välja (ingen vald ännu)
+                int best = int.MaxValue; // "bästa distansen" = oändligt som start
+                foreach (var v in Q) // loopa igenom alla ofinaliserade noder FÖR ATT HITTA NODEN MED MINSTA DISTANS
+                {
+                    int d = dist[v];  // nuvarande kända avstånd från 'source' till v
+                    if (d < best) // om vi hittat en kortare distans
+                    {
+                        best = d; // uppdatera "bästa distansen"
+                        u = v; // och välj denna nod som kandidat
 
-                if (dist[u] == int.MaxValue)
-                    break; // resten oåtkomligt
+                        // NU ÄR U = NODEN MED LÄGSTA DIST I Q
 
-                // relaxera kanter u -> v
+                    }
+                }
+
+                // om minsta dist fortfarande är "oändlig" är resten oåtkomligt
+                if (u == null || best == int.MaxValue)
+                    break;
+
+                Q.Remove(u); // // HÄR FINALISERAS 'u' (ta bort från kandidater) för den har nu kortaste distansen från source
+
+                // RELAXERA U:S DIREKTA KANTER (GÅ IGENOM ALLA GRANNAR V TILL U)
                 foreach (var edge in u.Neighbors)
                 {
-                    var v = edge.Destination;           // ← konsekvent: Neighbor.Destination
+                    var v = edge.Destination;   // granne till u
                     var alt = dist[u] + edge.Distance;  // kandidatdistans via u
-                    if (alt < dist[v])
+
+                    if (alt < dist[v]) // bättre än nuvarande känd distans?
                     {
-                        dist[v] = alt;
-                        prev[v] = u;
+                        dist[v] = alt; // uppdatera kortaste kända distans
+                        prev[v] = u; // uppdatera föregångare (för backtracking)
                     }
                 }
             }
 
             // Bygg Path-objekt för source → alla andra
-            source.ShortestPaths.Clear();
-            foreach (var other in graph)
+            source.ShortestPaths.Clear(); // töm tidigare resultat (om det finns)
+
+            foreach (var other in graph) // gå igenom alla noder i grafen
             {
                 if (other == source)
-                    continue;
+                    continue; // hoppa över source (vi vill inte ha en väg till sig själv)
 
-                var path = new Path
+                var path = new Path // skapa ett nytt Path-objekt
                 {
-                    Destination = other,
-                    Distance = dist[other]
+                    Destination = other, // destinationen är den andra noden
+                    Distance = dist[other] // totaldistansen från source till other
                 };
 
                 // Backtracka prev-kedjan för att få mellanstopp (utan source & dest)
-                var stops = new List<string>();
-                var stop = prev[other];
-                while (stop != null && stop != source)
+                var stops = new List<string>(); // tom lista för mellan-stopp
+                var stop = prev[other]; // börja backtracka från föregångaren till 'other'
+                while (stop != null && stop != source) // så länge vi inte nått källan
                 {
-                    stops.Add(stop.Name);
-                    stop = prev[stop];
+                    stops.Add(stop.Name); // lägg till nodens namn i listan
+                    stop = prev[stop]; // gå vidare till föregångaren
                 }
                 stops.Reverse();          // rätt ordning (source → destination)
-                path.StopNames = stops;
+                path.StopNames = stops; // kopiera in i Path-objektet
 
-                source.ShortestPaths.Add(path);
+                source.ShortestPaths.Add(path); // lägg till Path-objektet i source.ShortestPaths
             }
 
-            // Sortera efter totaldistans (snyggare meny)
+            // Sortera efter totaldistans
             source.ShortestPaths.Sort((a, b) => a.Distance.CompareTo(b.Distance));
         }
     }
