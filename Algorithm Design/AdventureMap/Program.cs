@@ -11,98 +11,135 @@ class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        // 1. Sätt storlek
+        Console.WriteLine("Get ready for: Minotaur's Lair");
+        Console.WriteLine();
+        Console.WriteLine("Press any key to start ...");
+
+        Console.ReadKey(true);
+        Console.Clear();
+
         width = 39;
         height = 23;
 
-        // 2. Skapa map
         map = new char[width, height];
 
-        // 3. Fyll map (enkel bana)
         string[] level =
-{
-    "#######################################",
-    "#                                     #",
-    "#                                     #",
-    "#                  S                  #",
-    "#                  #                  #",
-    "#   #########      #      #########   #",
-    "#   #       #      #      #       #   #",
-    "#   # ###   #   #######   #   ### #   #",
-    "#   #   #   #             #   #   #   #",
-    "#   ### #   #####     #####   # ###   #",
-    "#       #       #     #       #       #",
-    "#   #####   ### #     # ###   #####   #",
-    "#   #       #   #######   #       #   #",
-    "#   #   ### #      M      # ###   #   #",
-    "#   #   #   ###############   #   #   #",
-    "#   #   #                     #   #   #",
-    "#   #   #####   #######   #####   #   #",
-    "#   #       #   #     #   #       #   #",
-    "#   ####### #   #     #   # #######   #",
-    "#         # #   #######   # #         #",
-    "#   ##### # #             # # #####   #",
-    "#         #                 #         #",
-    "#######################################"
+        {
+            "#######################################",
+            "#                                     #",
+            "#                                     #",
+            "#                  S                  #",
+            "#                  #                  #",
+            "#   #########      #      #########   #",
+            "#   #       #      #      #       #   #",
+            "#   # ###   #   #######   #   ### #   #",
+            "#   #   #   #             #   #   #   #",
+            "#   ### #   #####     #####   # ###   #",
+            "#       #       #     #       #       #",
+            "#   #####   ### #     # ###   #####   #",
+            "#   #       #   #######   #       #   #",
+            "#   #   ### #      M      # ###   #   #",
+            "#   #   #   ###############   #   #   #",
+            "#   #   #                     #   #   #",
+            "#   #   #####   #######   #####   #   #",
+            "#   #       #   #     #   #       #   #",
+            "#   ####### #   #     #   # #######   #",
+            "#         # #   #######   # #         #",
+            "#   ##### # #             # # #####   #",
+            "#         #                 #         #",
+            "#######################################"
         };
 
+        // Fyll kartan först
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 char c = level[y][x];
-                map[x, y] = c;
 
-                // hitta start
                 if (c == 'S')
                 {
                     playerX = x;
                     playerY = y;
+                    map[x, y] = ' ';
+                }
+                else
+                {
+                    map[x, y] = c;
                 }
             }
         }
 
-        // 4. Rita kartan
-        DrawMap();
+        // Lägg till träd EFTER att kartan är fylld
+        for (int y = 0; y < 3; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (map[x, y] == ' ' && random.Next(4) == 0)
+                {
+                    map[x, y] = '♠';
+                }
+            }
+        }
+
+        while (true)
+        {
+            DrawMap();
+
+            var key = Console.ReadKey(true);
+
+            if (key.Key == ConsoleKey.Escape)
+                return;
+
+            int newX = playerX;
+            int newY = playerY;
+
+            if (key.Key == ConsoleKey.UpArrow)
+                newY--;
+            else if (key.Key == ConsoleKey.DownArrow)
+                newY++;
+            else if (key.Key == ConsoleKey.LeftArrow)
+                newX--;
+            else if (key.Key == ConsoleKey.RightArrow)
+                newX++;
+
+            if (newX >= 0 && newX < width &&
+                newY >= 0 && newY < height &&
+                map[newX, newY] != '#')
+            {
+                playerX = newX;
+                playerY = newY;
+            }
+        }
     }
 
     static void DrawMap()
     {
+        Console.SetCursorPosition(0, 0);
+
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
-                // spelare
                 if (x == playerX && y == playerY)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.Write("☺");
                 }
                 else
                 {
                     char c = map[x, y];
 
-                    // träd i de tre översta raderna
-                    if (y < 3 && c == ' ')
+                    if (c == '♠')
                     {
-                        if (random.Next(4) == 0) // ungefär 25% chans
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.Write("♠");
-                        }
-                        else
-                        {
-                            Console.ResetColor();
-                            Console.Write(" ");
-                        }
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(c);
                     }
-                    // vägg
                     else if (c == '#')
                     {
                         Console.ForegroundColor = ConsoleColor.Gray;
                         Console.Write(c);
                     }
-                    // minotaur
                     else if (c == 'M')
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
