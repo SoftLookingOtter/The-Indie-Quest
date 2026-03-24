@@ -103,6 +103,16 @@ class Program
             else if (key.Key == ConsoleKey.RightArrow)
                 newX++;
 
+            // WIN CONDITION
+            if (map[newX, newY] == 'M')
+            {
+                Console.Clear();
+                Console.WriteLine("🏆 You defeated the Minotaur!");
+                Console.ReadKey();
+                return;
+            }
+
+            // vanlig movement
             if (newX >= 0 && newX < width &&
                 newY >= 0 && newY < height &&
                 map[newX, newY] != '#')
